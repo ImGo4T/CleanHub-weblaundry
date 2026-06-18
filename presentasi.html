@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CleanHub — Presentasi UI/UX</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *{margin:0;padding:0;box-sizing:border-box}
+        :root{
+            --bg:#09090b;--surface:#18181b;--surface2:#27272a;--border:#3f3f46;
+            --text:#fafafa;--text2:#a1a1aa;--text3:#71717a;
+            --blue:#3b82f6;--blue-g:linear-gradient(135deg,#3b82f6,#6366f1);
+            --green:#22c55e;--green-g:linear-gradient(135deg,#22c55e,#10b981);
+            --amber:#f59e0b;--amber-g:linear-gradient(135deg,#f59e0b,#f97316);
+            --violet:#8b5cf6;--violet-g:linear-gradient(135deg,#8b5cf6,#a855f7);
+            --rose:#f43f5e;--rose-g:linear-gradient(135deg,#f43f5e,#ec4899);
+            --teal:#14b8a6;--teal-g:linear-gradient(135deg,#14b8a6,#06b6d4);
+        }
+        html{scroll-behavior:smooth}
+        body{font-family:'Inter',system-ui,sans-serif;background:var(--bg);color:var(--text);overflow:hidden;height:100vh;-webkit-font-smoothing:antialiased}
+
+        /* ── Progress Bar ── */
+        .progress-track{position:fixed;top:0;left:0;right:0;height:3px;background:var(--surface);z-index:200}
+        .progress-fill{height:100%;background:var(--blue-g);transition:width .5s cubic-bezier(.4,0,.2,1);border-radius:0 2px 2px 0}
+
+        /* ── Slides ── */
+        .deck{width:100vw;height:100vh;position:relative}
+        .slide{position:absolute;inset:0;display:flex;flex-direction:column;padding:80px 96px;opacity:0;visibility:hidden;transition:opacity .6s ease,transform .6s cubic-bezier(.4,0,.2,1);transform:translateY(24px) scale(.98)}
+        .slide.active{opacity:1;visibility:visible;transform:translateY(0) scale(1)}
+        .slide.exit{opacity:0;transform:translateY(-24px) scale(.98)}
+
+        /* ── Nav ── */
+        .nav{position:fixed;bottom:0;left:0;right:0;height:56px;background:rgba(9,9,11,.85);backdrop-filter:blur(16px) saturate(180%);border-top:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;padding:0 32px;z-index:100}
+        .nav .info{font-size:12px;color:var(--text3);font-weight:500;font-family:'JetBrains Mono',monospace;min-width:60px}
+        .nav .titles{display:flex;gap:4px;flex:1;justify-content:center;flex-wrap:wrap}
+        .nav .title-dot{width:6px;height:6px;border-radius:50%;background:var(--border);cursor:pointer;transition:all .3s}
+        .nav .title-dot.active{background:var(--blue);box-shadow:0 0 8px rgba(59,130,246,.5);width:20px;border-radius:3px}
+        .nav .title-dot:hover{background:var(--text3)}
+        .nav-btns{display:flex;gap:6px;min-width:60px;justify-content:flex-end}
+        .nav-btn{background:var(--surface2);border:1px solid var(--border);color:var(--text2);padding:6px 14px;border-radius:6px;cursor:pointer;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;transition:all .2s}
+        .nav-btn:hover{background:var(--border);color:var(--text)}
+        .nav-btn:disabled{opacity:.25;cursor:default}
+
+        /* ── Common ── */
+        .tag{display:inline-flex;align-items:center;gap:6px;padding:5px 12px;border-radius:999px;font-size:11px;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:14px}
+        .tag-blue{background:rgba(59,130,246,.12);color:#60a5fa;border:1px solid rgba(59,130,246,.2)}
+        .tag-green{background:rgba(34,197,94,.12);color:#4ade80;border:1px solid rgba(34,197,94,.2)}
+        .tag-violet{background:rgba(139,92,246,.12);color:#a78bfa;border:1px solid rgba(139,92,246,.2)}
+        .tag-amber{background:rgba(245,158,11,.12);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}
+        .tag-rose{background:rgba(244,63,94,.12);color:#fb7185;border:1px solid rgba(244,63,94,.2)}
+        .tag-teal{background:rgba(20,184,166,.12);color:#2dd4bf;border:1px solid rgba(20,184,166,.2)}
+        h2.slide-title{font-size:clamp(28px,4vw,48px);font-weight:800;letter-spacing:-1.5px;line-height:1.08}
+        .slide-desc{font-size:15px;color:var(--text2);margin-top:10px;line-height:1.65;max-width:560px}
+
+        /* ── Glass Card ── */
+        .glass{background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.07);border-radius:16px;padding:24px;backdrop-filter:blur(8px);transition:all .3s}
+        .glass:hover{background:rgba(255,255,255,.055);border-color:rgba(255,255,255,.12);transform:translateY(-2px)}
+        .glass h3{font-size:15px;font-weight:700;margin-bottom:6px}
+        .glass p{font-size:13px;color:var(--text2);line-height:1.5}
+        .glass .gi{width:40px;height:40px;border-radius:10px;display:flex;align-items:center;justify-content:center;margin-bottom:14px;font-size:18px}
+
+        /* ── Cover ── */
+        .cover{display:flex;align-items:center;justify-content:center;text-align:center}
+        .cover-inner{max-width:680px}
+        .cover-logo{width:72px;height:72px;border-radius:20px;background:var(--blue-g);display:flex;align-items:center;justify-content:center;margin:0 auto 28px;box-shadow:0 12px 40px rgba(59,130,246,.35)}
+        .cover-logo svg{width:38px;height:38px;color:#fff}
+        .cover h1{font-size:clamp(40px,6vw,72px);font-weight:900;letter-spacing:-3px;background:linear-gradient(135deg,#fff 20%,#a1a1aa 80%);-webkit-background-clip:text;-webkit-text-fill-color:transparent;line-height:1}
+        .cover .sub{font-size:18px;color:var(--text2);margin-top:12px;font-weight:400}
+        .cover .pills{display:flex;gap:8px;justify-content:center;margin-top:36px;flex-wrap:wrap}
+        .pill{background:var(--surface);border:1px solid var(--border);padding:6px 14px;border-radius:999px;font-size:12px;font-weight:600;color:var(--text2)}
+
+        /* ── Roles ── */
+        .roles{display:grid;grid-template-columns:1fr 1fr;gap:20px;width:100%;max-width:1060px}
+        .role-card{border-radius:16px;padding:32px;border:1px solid var(--border);background:var(--surface);position:relative;overflow:hidden}
+        .role-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+        .role-card.admin::before{background:var(--blue-g)}
+        .role-card.user::before{background:var(--green-g)}
+        .role-card h3{font-size:20px;font-weight:700;margin-bottom:6px}
+        .role-card .rd{font-size:13px;color:var(--text2);margin-bottom:18px}
+        .role-card ul{list-style:none;display:flex;flex-direction:column;gap:8px}
+        .role-card li{font-size:13px;color:var(--text2);display:flex;align-items:center;gap:8px}
+        .role-card li .dot{width:5px;height:5px;border-radius:50%;flex-shrink:0}
+        .role-card.admin li .dot{background:var(--blue)}
+        .role-card.user li .dot{background:var(--green)}
+
+        /* ── KPI ── */
+        .kpi-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+        .kpi{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px;position:relative;overflow:hidden}
+        .kpi::after{content:'';position:absolute;top:0;left:0;width:100%;height:2px}
+        .kpi:nth-child(1)::after{background:var(--blue-g)}
+        .kpi:nth-child(2)::after{background:var(--amber-g)}
+        .kpi:nth-child(3)::after{background:var(--green-g)}
+        .kpi:nth-child(4)::after{background:var(--violet-g)}
+        .kpi .kl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:600}
+        .kpi .kv{font-size:24px;font-weight:800;margin-top:4px;font-family:'JetBrains Mono',monospace}
+
+        /* ── Pipeline ── */
+        .pipe{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+        .pipe-item{text-align:center;background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 8px;position:relative;overflow:hidden}
+        .pipe-item::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px}
+        .pipe-item:nth-child(1)::before{background:#3b82f6}
+        .pipe-item:nth-child(2)::before{background:#eab308}
+        .pipe-item:nth-child(3)::before{background:#f97316}
+        .pipe-item:nth-child(4)::before{background:#22c55e}
+        .pipe-item:nth-child(5)::before{background:#14b8a6}
+        .pipe-item .pd{width:8px;height:8px;border-radius:50%;margin:0 auto 6px}
+        .pipe-item .pc{font-size:22px;font-weight:800;font-family:'JetBrains Mono',monospace}
+        .pipe-item .pl{font-size:10px;color:var(--text3);margin-top:2px}
+
+        /* ── Mockup ── */
+        .mock{background:var(--surface);border:1px solid var(--border);border-radius:14px;overflow:hidden;box-shadow:0 16px 48px rgba(0,0,0,.35)}
+        .mock-bar{height:32px;background:var(--bg);display:flex;align-items:center;padding:0 12px;gap:6px;border-bottom:1px solid var(--border)}
+        .mock-bar span{width:9px;height:9px;border-radius:50%}
+        .mock-bar span:nth-child(1){background:#ef4444}
+        .mock-bar span:nth-child(2){background:#f59e0b}
+        .mock-bar span:nth-child(3){background:#22c55e}
+        .mock-body{padding:20px}
+        .mini-tbl{width:100%;border-collapse:collapse;font-size:12px}
+        .mini-tbl th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);padding:8px;border-bottom:1px solid var(--border);font-weight:600}
+        .mini-tbl td{padding:8px;color:var(--text2);border-bottom:1px solid rgba(63,63,70,.5)}
+        .mbadge{display:inline-flex;padding:2px 8px;border-radius:999px;font-size:10px;font-weight:600}
+
+        /* ── Info Panel ── */
+        .ip{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:16px}
+        .ip .ipl{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--text3);font-weight:600;margin-bottom:4px}
+        .ip .ipv{font-size:13px;font-weight:600;color:var(--text2)}
+
+        /* ── Flow ── */
+        .flow{display:flex;align-items:center;justify-content:center;gap:0;flex-wrap:wrap}
+        .flow-step{display:flex;flex-direction:column;align-items:center;gap:6px;padding:16px}
+        .flow-icon{width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:22px}
+        .flow-label{font-size:12px;font-weight:600;color:var(--text2);text-align:center}
+        .flow-sub{font-size:10px;color:var(--text3)}
+        .flow-arr{color:var(--border);font-size:18px}
+
+        /* ── Two Col ── */
+        .two-col{display:grid;grid-template-columns:1fr 1fr;gap:24px;width:100%;max-width:1060px}
+        .col-header{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+
+        /* ── Tech ── */
+        .tech-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:1060px}
+        .tech-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:24px}
+        .tech-card h4{font-size:13px;font-weight:700;color:var(--text2);margin-bottom:12px}
+        .tech-pills{display:flex;flex-wrap:wrap;gap:6px}
+        .tp{background:var(--surface2);border:1px solid var(--border);padding:4px 10px;border-radius:999px;font-size:11px;color:var(--text2);font-weight:500}
+
+        /* ── End ── */
+        .end{display:flex;align-items:center;justify-content:center;text-align:center}
+        .end h2{font-size:clamp(36px,5vw,60px);font-weight:900;letter-spacing:-2px;background:linear-gradient(135deg,#60a5fa,#a78bfa,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+
+        /* ── Layout Helpers ── */
+        .flex-center{display:flex;align-items:center;justify-content:center}
+        .flex-col-center{display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%}
+        .w-full{width:100%}.max-w{max-width:1060px}
+        .gap-20{gap:20px}.gap-12{gap:12px}.gap-16{gap:16px}
+        .mb-20{margin-bottom:20px}.mb-12{margin-bottom:12px}.mb-28{margin-bottom:28px}
+        .grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;width:100%;max-width:1060px}
+        .grid-2-1{display:grid;grid-template-columns:2fr 1fr;gap:20px;width:100%;max-width:1060px;align-items:start}
+
+        /* ── Animations ── */
+        @keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+        .slide.active .anim{animation:fadeUp .5s ease both}
+        .slide.active .anim-d1{animation-delay:.1s}
+        .slide.active .anim-d2{animation-delay:.2s}
+        .slide.active .anim-d3{animation-delay:.3s}
+        .slide.active .anim-d4{animation-delay:.4s}
+        .slide.active .anim-d5{animation-delay:.5s}
+        .slide.active .anim-d6{animation-delay:.6s}
+
+        /* ── Responsive ── */
+        @media(max-width:900px){
+            .slide{padding:48px 24px}
+            .roles,.two-col,.tech-grid,.grid-3,.grid-2-1{grid-template-columns:1fr}
+            .kpi-grid{grid-template-columns:repeat(2,1fr)}
+            .pipe{grid-template-columns:repeat(3,1fr)}
+            .flow-arr{display:none}
+        }
+    </style>
+</head>
+<body>
+
+<div class="progress-track"><div class="progress-fill" id="progressFill" style="width:10%"></div></div>
+<div class="deck" id="deck">
+
+<!-- ═══ 0: COVER ═══ -->
+<div class="slide cover active" data-i="0">
+    <div class="cover-inner">
+        <div class="cover-logo anim">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 5 10 5 14.5C5 18.09 8.13 21 12 21C15.87 21 19 18.09 19 14.5C19 10 12 2 12 2Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+        </div>
+        <h1 class="anim anim-d1">CleanHub</h1>
+        <p class="sub anim anim-d2">Sistem Manajemen Laundry Modern</p>
+        <div class="pills anim anim-d3">
+            <span class="pill">Laravel 12</span><span class="pill">React 19</span><span class="pill">Inertia.js</span><span class="pill">TypeScript</span><span class="pill">Tailwind CSS 4</span><span class="pill">shadcn/ui</span>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 1: ROLES ═══ -->
+<div class="slide" data-i="1">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:28px" class="anim">
+            <div class="tag tag-blue">👥 Actor &amp; Roles</div>
+            <h2 class="slide-title">Dua Role, Satu Platform</h2>
+            <p class="slide-desc" style="margin:10px auto 0">CleanHub dirancang untuk dua tipe pengguna dengan akses berbeda sesuai kebutuhan.</p>
+        </div>
+        <div class="roles anim anim-d2">
+            <div class="role-card admin">
+                <h3>🛡️ Admin / Operator</h3>
+                <p class="rd">Mengelola seluruh operasional laundry sehari-hari.</p>
+                <ul>
+                    <li><span class="dot"></span>Dashboard KPI + pipeline order</li>
+                    <li><span class="dot"></span>Membuat & mengelola order</li>
+                    <li><span class="dot"></span>Update status (cuci → setrika → siap)</li>
+                    <li><span class="dot"></span>Kelola pembayaran & verifikasi</li>
+                    <li><span class="dot"></span>CRUD pelanggan & membership</li>
+                    <li><span class="dot"></span>Kelola katalog layanan & harga</li>
+                </ul>
+            </div>
+            <div class="role-card user">
+                <h3>👤 Pelanggan</h3>
+                <p class="rd">Monitoring order dan riwayat laundry pribadi.</p>
+                <ul>
+                    <li><span class="dot"></span>Dashboard personal ringkasan order</li>
+                    <li><span class="dot"></span>Lihat status order real-time</li>
+                    <li><span class="dot"></span>Riwayat pembayaran lengkap</li>
+                    <li><span class="dot"></span>Info membership & poin loyalty</li>
+                    <li><span class="dot"></span>Diskon otomatis berdasarkan tier</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 2: DASHBOARD ═══ -->
+<div class="slide" data-i="2">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:24px" class="anim">
+            <div class="tag tag-green">📊 Dashboard</div>
+            <h2 class="slide-title">Dashboard Profesional</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Overview bisnis real-time dengan KPI, pipeline, dan revenue.</p>
+        </div>
+        <div class="grid-2-1 anim anim-d2">
+            <div class="mock">
+                <div class="mock-bar"><span></span><span></span><span></span></div>
+                <div class="mock-body">
+                    <div style="font-size:16px;font-weight:700;margin-bottom:2px" class="anim anim-d3">Selamat Pagi, <span style="color:#60a5fa">Admin</span></div>
+                    <div style="font-size:11px;color:var(--text3);margin-bottom:14px">📅 Senin, 15 Juni 2026</div>
+                    <div class="kpi-grid mb-12">
+                        <div class="kpi"><div class="kl">Order Hari Ini</div><div class="kv" style="color:#60a5fa">12</div></div>
+                        <div class="kpi"><div class="kl">Order Aktif</div><div class="kv" style="color:#fbbf24">8</div></div>
+                        <div class="kpi"><div class="kl">Revenue</div><div class="kv" style="color:#4ade80;font-size:16px">Rp 850K</div></div>
+                        <div class="kpi"><div class="kl">Pelanggan</div><div class="kv" style="color:#a78bfa">24</div></div>
+                    </div>
+                    <div class="pipe">
+                        <div class="pipe-item"><div class="pd" style="background:#3b82f6"></div><div class="pc">3</div><div class="pl">Diterima</div></div>
+                        <div class="pipe-item"><div class="pd" style="background:#eab308"></div><div class="pc">2</div><div class="pl">Dicuci</div></div>
+                        <div class="pipe-item"><div class="pd" style="background:#f97316"></div><div class="pc">1</div><div class="pl">Disetrika</div></div>
+                        <div class="pipe-item"><div class="pd" style="background:#22c55e"></div><div class="pc">2</div><div class="pl">Siap</div></div>
+                        <div class="pipe-item"><div class="pd" style="background:#14b8a6"></div><div class="pc">0</div><div class="pl">Diambil</div></div>
+                    </div>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="ip"><div class="ipl">Komponen</div><div class="ipv">4 KPI + Pipeline + Revenue</div></div>
+                <div class="ip"><div class="ipl">Interaktif</div><div class="ipv">Klik pipeline → filter order</div></div>
+                <div class="ip"><div class="ipl">Responsif</div><div class="ipv">Desktop table → Mobile cards</div></div>
+                <div class="ip"><div class="ipl">Personalisasi</div><div class="ipv">Greeting by waktu hari</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 3: ORDERS ═══ -->
+<div class="slide" data-i="3">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:24px" class="anim">
+            <div class="tag tag-violet">📦 Order Management</div>
+            <h2 class="slide-title">Manajemen Order</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Pembuatan, tracking, dan pembayaran — semua terintegrasi.</p>
+        </div>
+        <div class="grid-2-1 anim anim-d2">
+            <div class="mock">
+                <div class="mock-bar"><span></span><span></span><span></span></div>
+                <div class="mock-body">
+                    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+                        <span style="font-size:15px;font-weight:700">📦 Daftar Orders</span>
+                        <span style="background:var(--blue);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600">+ Order Baru</span>
+                    </div>
+                    <table class="mini-tbl">
+                        <thead><tr><th>Kode</th><th>Pelanggan</th><th>Total</th><th>Status</th><th>Bayar</th></tr></thead>
+                        <tbody>
+                            <tr><td style="color:#60a5fa;font-weight:600">CLH-0615-001</td><td>Budi Santoso</td><td style="font-weight:600">Rp 75.000</td><td><span class="mbadge" style="background:rgba(59,130,246,.12);color:#60a5fa">Diterima</span></td><td><span class="mbadge" style="background:rgba(239,68,68,.12);color:#f87171">Belum</span></td></tr>
+                            <tr><td style="color:#60a5fa;font-weight:600">CLH-0615-002</td><td>Siti Rahayu</td><td style="font-weight:600">Rp 135.000</td><td><span class="mbadge" style="background:rgba(234,179,8,.12);color:#eab308">Dicuci</span></td><td><span class="mbadge" style="background:rgba(34,197,94,.12);color:#4ade80">Lunas</span></td></tr>
+                            <tr><td style="color:#60a5fa;font-weight:600">CLH-0615-003</td><td>Andi Wijaya</td><td style="font-weight:600">Rp 50.000</td><td><span class="mbadge" style="background:rgba(34,197,94,.12);color:#4ade80">Siap</span></td><td><span class="mbadge" style="background:rgba(234,179,8,.12);color:#eab308">Partial</span></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="ip"><div class="ipl">Status Flow</div><div class="ipv">Diterima → Dicuci → Setrika → Siap → Diambil</div></div>
+                <div class="ip"><div class="ipl">Filter</div><div class="ipv">Search kode/nama + filter status</div></div>
+                <div class="ip"><div class="ipl">Diskon Auto</div><div class="ipv">Bronze 0% · Silver 5% · Gold 10%</div></div>
+                <div class="ip"><div class="ipl">Atomic TX</div><div class="ipv">Order+items+log = DB::transaction</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 4: ORDER FLOW ═══ -->
+<div class="slide" data-i="4">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:32px" class="anim">
+            <div class="tag tag-amber">🔄 Alur Kerja</div>
+            <h2 class="slide-title">Flow Order Laundry</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Dari laundry masuk hingga selesai dan dibayar lunas.</p>
+        </div>
+        <div class="flow mb-28 anim anim-d2">
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(59,130,246,.12);color:#60a5fa">📝</div><div class="flow-label">Buat Order</div><div class="flow-sub">Pilih layanan & item</div></div>
+            <div class="flow-arr">→</div>
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(59,130,246,.12);color:#3b82f6">📥</div><div class="flow-label">Diterima</div><div class="flow-sub">Laundry masuk</div></div>
+            <div class="flow-arr">→</div>
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(234,179,8,.12);color:#eab308">🧺</div><div class="flow-label">Dicuci</div><div class="flow-sub">Proses cuci</div></div>
+            <div class="flow-arr">→</div>
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(249,115,22,.12);color:#f97316">👔</div><div class="flow-label">Disetrika</div><div class="flow-sub">Penyetrikaan</div></div>
+            <div class="flow-arr">→</div>
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(34,197,94,.12);color:#4ade80">✅</div><div class="flow-label">Siap</div><div class="flow-sub">Siap diambil</div></div>
+            <div class="flow-arr">→</div>
+            <div class="flow-step"><div class="flow-icon" style="background:rgba(20,184,166,.12);color:#2dd4bf">💰</div><div class="flow-label">Selesai</div><div class="flow-sub">Bayar lunas</div></div>
+        </div>
+        <div class="grid-3 anim anim-d3">
+            <div class="glass"><div class="gi" style="background:rgba(59,130,246,.1);color:#60a5fa">📋</div><h3>Multi-Item</h3><p>Satu order berisi banyak item laundry dengan harga berbeda.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(234,179,8,.1);color:#eab308">📜</div><h3>Status Timeline</h3><p>Setiap update tercatat lengkap dengan timestamp & catatan.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(34,197,94,.1);color:#4ade80">🚚</div><h3>Pickup & Delivery</h3><p>Support antar-jemput: drop-off, pickup kurir, delivery.</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 5: CUSTOMERS ═══ -->
+<div class="slide" data-i="5">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:24px" class="anim">
+            <div class="tag tag-teal">👥 Customer</div>
+            <h2 class="slide-title">Pelanggan & Membership</h2>
+            <p class="slide-desc" style="margin:10px auto 0">CRUD lengkap dengan membership tier dan loyalty points.</p>
+        </div>
+        <div class="grid-2-1 anim anim-d2">
+            <div class="mock">
+                <div class="mock-bar"><span></span><span></span><span></span></div>
+                <div class="mock-body">
+                    <div style="font-size:15px;font-weight:700;margin-bottom:12px">👥 Daftar Pelanggan</div>
+                    <table class="mini-tbl">
+                        <thead><tr><th>Nama</th><th>Email</th><th>Member</th><th>Poin</th></tr></thead>
+                        <tbody>
+                            <tr><td style="color:#60a5fa;font-weight:600">Siti Rahayu</td><td>siti@email.com</td><td><span class="mbadge" style="background:rgba(234,179,8,.12);color:#eab308">👑 Gold</span></td><td style="font-weight:700">500</td></tr>
+                            <tr><td style="color:#60a5fa;font-weight:600">Budi Santoso</td><td>budi@email.com</td><td><span class="mbadge" style="background:rgba(161,161,170,.12);color:#a1a1aa">Silver</span></td><td style="font-weight:700">150</td></tr>
+                            <tr><td style="color:#60a5fa;font-weight:600">Andi Wijaya</td><td>andi@email.com</td><td><span class="mbadge" style="background:rgba(217,119,6,.12);color:#d97706">Bronze</span></td><td style="font-weight:700">0</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <div style="display:flex;flex-direction:column;gap:10px">
+                <div class="ip"><div class="ipl">Membership</div><div class="ipv">Bronze → Silver → Gold</div></div>
+                <div class="ip"><div class="ipl">Diskon</div><div class="ipv">0% → 5% → 10%</div></div>
+                <div class="ip"><div class="ipl">Loyalty Points</div><div class="ipv">Auto + on order selesai, multiplier by tier</div></div>
+                <div class="ip"><div class="ipl">Edit Page</div><div class="ipv">Ubah data, tier & poin</div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 6: SERVICES & PAYMENTS ═══ -->
+<div class="slide" data-i="6">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:24px" class="anim">
+            <div class="tag tag-rose">💎 Layanan & Pembayaran</div>
+            <h2 class="slide-title">Katalog & Payment</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Layanan laundry fleksibel dengan berbagai metode pembayaran.</p>
+        </div>
+        <div class="two-col anim anim-d2">
+            <div>
+                <div class="col-header">🧺 Katalog Layanan</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <div class="glass" style="padding:16px"><h3 style="margin-bottom:2px">Cuci Basah — <span style="color:#4ade80">Rp 7.000/kg</span></h3><p>24 jam · Per Kg · ✅ Aktif</p></div>
+                    <div class="glass" style="padding:16px"><h3 style="margin-bottom:2px">Cuci Kering — <span style="color:#4ade80">Rp 10.000/kg</span></h3><p>24 jam · Per Kg · ✅ Aktif</p></div>
+                    <div class="glass" style="padding:16px"><h3 style="margin-bottom:2px">Setrika — <span style="color:#4ade80">Rp 8.000/kg</span></h3><p>12 jam · Per Kg · ✅ Aktif</p></div>
+                    <div class="glass" style="padding:16px"><h3 style="margin-bottom:2px">Cuci Komplit — <span style="color:#4ade80">Rp 15.000/kg</span></h3><p>48 jam · Kg/Item · ✅ Aktif</p></div>
+                </div>
+            </div>
+            <div>
+                <div class="col-header">💳 Pembayaran</div>
+                <div style="display:flex;flex-direction:column;gap:8px">
+                    <div class="glass" style="padding:16px"><div class="gi" style="background:rgba(34,197,94,.1);color:#4ade80;width:32px;height:32px;font-size:14px;margin-bottom:10px">💵</div><h3>Tunai</h3><p>Auto-verified saat dicatat.</p></div>
+                    <div class="glass" style="padding:16px"><div class="gi" style="background:rgba(59,130,246,.1);color:#60a5fa;width:32px;height:32px;font-size:14px;margin-bottom:10px">🏦</div><h3>Transfer</h3><p>Pending → verifikasi manual admin.</p></div>
+                    <div class="glass" style="padding:16px"><div class="gi" style="background:rgba(139,92,246,.1);color:#a78bfa;width:32px;height:32px;font-size:14px;margin-bottom:10px">📱</div><h3>E-Wallet</h3><p>GoPay, OVO, Dana, dll.</p></div>
+                    <div class="glass" style="padding:16px"><div class="gi" style="background:rgba(234,179,8,.1);color:#eab308;width:32px;height:32px;font-size:14px;margin-bottom:10px">📊</div><h3>Cicilan</h3><p>Unpaid → Partial → Paid.</p></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 7: FEATURES ═══ -->
+<div class="slide" data-i="7">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:28px" class="anim">
+            <div class="tag tag-blue">✨ Highlights</div>
+            <h2 class="slide-title">Fitur Unggulan</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Fokus pada UX dan kualitas teknis.</p>
+        </div>
+        <div class="grid-3 anim anim-d2">
+            <div class="glass"><div class="gi" style="background:rgba(59,130,246,.1);color:#60a5fa">📱</div><h3>Fully Responsive</h3><p>Desktop table + mobile card view di setiap halaman.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(139,92,246,.1);color:#a78bfa">🎨</div><h3>Design System</h3><p>shadcn/ui + Tailwind CSS 4. Konsisten visual.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(34,197,94,.1);color:#4ade80">🔒</div><h3>Role-Based Access</h3><p>Middleware protection. Fitur berbeda per role.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(234,179,8,.1);color:#eab308">⚡</div><h3>SPA Feel</h3><p>Inertia.js navigasi tanpa full reload.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(239,68,68,.1);color:#f87171">🛡️</div><h3>Atomic TX</h3><p>DB::transaction untuk konsistensi data.</p></div>
+            <div class="glass"><div class="gi" style="background:rgba(20,184,166,.1);color:#2dd4bf">🧪</div><h3>35+ Tests</h3><p>Pest PHP. Orders, Customers, Payments.</p></div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 8: TECH ═══ -->
+<div class="slide" data-i="8">
+    <div class="flex-col-center">
+        <div style="text-align:center;margin-bottom:28px" class="anim">
+            <div class="tag tag-violet">⚙️ Technology</div>
+            <h2 class="slide-title">Tech Stack Modern</h2>
+            <p class="slide-desc" style="margin:10px auto 0">Teknologi terkini untuk performa & maintainability.</p>
+        </div>
+        <div class="tech-grid anim anim-d2">
+            <div class="tech-card">
+                <h4>🔧 Backend</h4>
+                <div class="tech-pills">
+                    <span class="tp">Laravel 12</span><span class="tp">PHP 8.3</span><span class="tp">MySQL</span><span class="tp">Pest PHP v3</span><span class="tp">Form Requests</span><span class="tp">Enums</span>
+                </div>
+            </div>
+            <div class="tech-card">
+                <h4>🎨 Frontend</h4>
+                <div class="tech-pills">
+                    <span class="tp">React 19</span><span class="tp">TypeScript</span><span class="tp">Inertia.js 2</span><span class="tp">Tailwind CSS 4</span><span class="tp">shadcn/ui</span><span class="tp">Vite 6</span><span class="tp">Lucide Icons</span>
+                </div>
+            </div>
+            <div class="tech-card">
+                <h4>🏗️ Architecture</h4>
+                <div class="tech-pills">
+                    <span class="tp">Monolith SSR</span><span class="tp">RBAC</span><span class="tp">REST Routes</span><span class="tp">DB Transaction</span><span class="tp">Eloquent</span><span class="tp">Migration</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══ 9: END ═══ -->
+<div class="slide end" data-i="9">
+    <div>
+        <div class="cover-logo anim" style="margin:0 auto 24px">
+            <svg viewBox="0 0 24 24" fill="none"><path d="M12 2C12 2 5 10 5 14.5C5 18.09 8.13 21 12 21C15.87 21 19 18.09 19 14.5C19 10 12 2 12 2Z" fill="currentColor" fill-opacity=".2" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h2 class="anim anim-d1">Terima Kasih</h2>
+        <p style="font-size:16px;color:var(--text2);margin-top:12px" class="anim anim-d2">CleanHub — Solusi Manajemen Laundry Modern</p>
+        <div class="pills anim anim-d3" style="margin-top:28px">
+            <span class="pill">📧 admin@cleanhub.com</span>
+            <span class="pill">🔗 github.com/cleanhub</span>
+        </div>
+    </div>
+</div>
+
+</div>
+
+<!-- Nav -->
+<div class="nav">
+    <div class="info" id="counter">1 / 10</div>
+    <div class="titles" id="dots"></div>
+    <div class="nav-btns">
+        <button class="nav-btn" id="pBtn" onclick="go(-1)">‹</button>
+        <button class="nav-btn" id="nBtn" onclick="go(1)">›</button>
+    </div>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),T=slides.length;let cur=0;
+const dotsEl=document.getElementById('dots');
+for(let i=0;i<T;i++){const d=document.createElement('div');d.className='title-dot'+(i?'':' active');d.onclick=()=>jump(i);dotsEl.appendChild(d)}
+function jump(i){if(i<0||i>=T||i===cur)return;slides[cur].classList.remove('active');slides[cur].classList.add('exit');setTimeout(()=>slides[cur===i?cur:cur].classList.remove('exit'),600);const prev=cur;cur=i;slides[cur].classList.add('active');document.querySelectorAll('.title-dot').forEach((d,j)=>d.classList.toggle('active',j===cur));upd();setTimeout(()=>slides[prev].classList.remove('exit'),600)}
+function go(d){jump(cur+d)}
+function upd(){document.getElementById('counter').textContent=`${cur+1} / ${T}`;document.getElementById('progressFill').style.width=((cur+1)/T*100)+'%';document.getElementById('pBtn').disabled=cur===0;document.getElementById('nBtn').disabled=cur===T-1}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(1)}if(e.key==='ArrowLeft'){e.preventDefault();go(-1)}if(e.key==='Home'){e.preventDefault();jump(0)}if(e.key==='End'){e.preventDefault();jump(T-1)}});
+let tx=0;document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX});document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50)go(d>0?1:-1)});
+upd();
+</script>
+</body>
+</html>
